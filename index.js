@@ -22,7 +22,9 @@ app.listen(process.env.PORT || 3000, (err) => {
     }
 });
 
-
+app.get("/", (req,res)=>{
+    res.send("Hello this is jinendra");
+});
 app.post("/register", register, sendVarificationMail);
 app.post("/resendotp", register, sendVarificationMail);
 app.post("/varify", varifyOtp);
