@@ -1,6 +1,4 @@
 const nodemailer = require("nodemailer");
-const dotenv = require("dotenv");
-dotenv.config();
 
 let mail = nodemailer.createTransport({
     host: "smtp-mail.outlook.com",

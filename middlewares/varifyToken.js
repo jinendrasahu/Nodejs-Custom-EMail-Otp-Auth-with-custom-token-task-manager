@@ -1,6 +1,4 @@
 const { default: mongoose } = require("mongoose");
-const dotenv = require("dotenv");
-dotenv.config();
 const Cryptr = require("cryptr");
 const cryptr = new Cryptr(process.env.SECRET_KEY);
 const { User } = require("../models/UserModel");

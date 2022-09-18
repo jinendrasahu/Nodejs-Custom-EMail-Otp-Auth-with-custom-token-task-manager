@@ -1,4 +1,3 @@
-const dotenv = require("dotenv");
 const { mongoose } = require("./db");
 const express = require("express");
 const { register } = require("./middlewares/register");
@@ -10,7 +9,6 @@ const { deleteTask } = require("./modules/DeleteTask");
 const { varifyToken } = require("./middlewares/varifyToken");
 const { createTask } = require("./modules/CreateTask");
 const { logout } = require("./modules/Logout");
-dotenv.config();
 const app = express();
 app.use(express.json());
 
