@@ -1,4 +1,5 @@
 const Cryptr = require("cryptr");
+const jwt = require("jsonwebtoken");
 const cryptr = new Cryptr(process.env.SECRET_KEY);
 const { User } = require("../models/UserModel");
 
@@ -17,6 +18,13 @@ module.exports.Login = async (req, res) => {
             message: "Password is required."
         });
     }
+    if(Object.keys(req.body).length!==2){
+        return res.status(400).json({
+            timestamp: Math.floor(Date.now() / 1000),
+            success: false,
+            message: "Extra parameter passed."
+        });
+    }
     let condition = {
         email: req.body.email.toString().trim()
     }
@@ -29,15 +37,14 @@ module.exports.Login = async (req, res) => {
                 message: "Invalid email or password."
             });
         }
-        let num = Math.random();
-        num = num < 0.1 ? num + 0.1 : num;
-        let generateOTP = Math.floor(num * Math.pow(10, 14));
-
         let tokenObj = {
-            uid: isUserDataExist._id.toString(),
-            token: generateOTP
+            uid: isUserDataExist._id.toString()
         }
-        let token = cryptr.encrypt(JSON.stringify(tokenObj));
+
+        let token = jwt.sign(tokenObj,process.env.SECRET_KEY,{
+            expiresIn : '3m'
+        })
+
         let updateData = { $set: { token, updated: Date.now() } }
         let user = await User.findOneAndUpdate(condition, updateData, { new: true, upsert: false });
         if (user && user._id) {
@@ -46,6 +53,7 @@ module.exports.Login = async (req, res) => {
                 timestamp: Math.floor(Date.now() / 1000),
                 success: true,
                 token: token,
+                expiryTime : new Date(new Date().getTime()+3*60000),
                 email: user.email,
                 message: "User logged in successfully."
             });

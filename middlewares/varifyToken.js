@@ -1,60 +1,63 @@
 const { default: mongoose } = require("mongoose");
-const Cryptr = require("cryptr");
-const cryptr = new Cryptr(process.env.SECRET_KEY);
 const { User } = require("../models/UserModel");
+const jwt = require("jsonwebtoken");
 
 module.exports.varifyToken = async (req, res, next) => {
-    if (!req.query.token && !req.body.token) {
+    if (!req.headers.token) {
         return res.status(400).json({
             timestamp: Math.floor(Date.now() / 1000),
             success: false,
             message: "Invalid Token."
         });
     } else {
-        let data = JSON.parse(cryptr.decrypt(req.body.token));
-
-        if (!data || !data.uid || !data.token) {
+        let tokenElement = req.headers.token.trim();
+        let tokenData = tokenElement.split(" ");
+        if (tokenData.length !== 2 || tokenData[0]!=="Bearer") {
             return res.status(400).json({
                 timestamp: Math.floor(Date.now() / 1000),
                 success: false,
-                message: "Invalid token."
+                message: "Invalid Token Format."
             });
         }
-        let condition = {
-            _id: mongoose.Types.ObjectId(data.uid),
-            isActive: true
-        }
+        jwt.verify(tokenData[1], process.env.SECRET_KEY, (err, data) => {
 
-        let isUserDataExist = await User.findOne(condition);
-
-        if (isUserDataExist && isUserDataExist._id) {
-            if (isUserDataExist.isVarified) {
-                let currentTimestamp = new Date();
-                let otpTimestamp = new Date(isUserDataExist.updated);
-                let dateDiff = currentTimestamp - otpTimestamp;
-                if (isUserDataExist.token !== req.body.token || (dateDiff > 1e3 && ((dateDiff / 1e3) >= 86400))) {
-                    return res.status(400).json({
-                        timestamp: Math.floor(Date.now() / 1000),
-                        success: false,
-                        message: "Token expired please loggin again."
-                    });
-                } else {
-                    req.user = JSON.parse(JSON.stringify(isUserDataExist));
-                    next();
-                }
-            } else {
+            if (err) {
                 return res.status(400).json({
                     timestamp: Math.floor(Date.now() / 1000),
                     success: false,
-                    message: "Invalid Token"
+                    message: "Invalid token."
                 });
             }
-        } else {
-            return res.status(400).json({
-                timestamp: Math.floor(Date.now() / 1000),
-                success: false,
-                message: "Invalid token."
+            let condition = {
+                _id: mongoose.Types.ObjectId(data.uid),
+                isActive: true
+            }
+
+            User.findOne(condition).exec((err, result) => {
+                if (err) {
+                    return res.status(400).json({
+                        timestamp: Math.floor(Date.now() / 1000),
+                        success: false,
+                        message: "Invalid token."
+                    });
+                }
+                if (!result.token) {
+                    return res.status(400).json({
+                        timestamp: Math.floor(Date.now() / 1000),
+                        success: false,
+                        message: "Please loggin again."
+                    });
+                }
+                if(result.token!==tokenData[1]){
+                    return res.status(400).json({
+                        timestamp: Math.floor(Date.now() / 1000),
+                        success: false,
+                        message: "Invalid Token."
+                    });
+                }
+                req.user = JSON.parse(JSON.stringify(result));
+                next();
             });
-        }
+        })
     }
 }

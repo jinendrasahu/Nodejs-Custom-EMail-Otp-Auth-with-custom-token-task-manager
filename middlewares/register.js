@@ -3,7 +3,7 @@ const cryptr = new Cryptr(process.env.SECRET_KEY);
 const { User } = require("../models/UserModel");
 
 module.exports.register = async (req, res, next) => {
-    if (!req.body.email || !req.body.email.toString().trim()) {
+    if (!req.body.email || !req.body.email.toString().trim() || !/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(req.body.email.toString().trim())) {
         return res.status(400).json({
             timestamp: Math.floor(Date.now() / 1000),
             success: false,
@@ -30,6 +30,21 @@ module.exports.register = async (req, res, next) => {
                 timestamp: Math.floor(Date.now() / 1000),
                 success: false,
                 message: "Password and confirm password should be same."
+            });
+        }
+        if (Object.keys(req.body).length !== 3) {
+            return res.status(400).json({
+                timestamp: Math.floor(Date.now() / 1000),
+                success: false,
+                message: "Extra parameter passed."
+            });
+        }
+    } else {
+        if (Object.keys(req.body).length !== 1) {
+            return res.status(400).json({
+                timestamp: Math.floor(Date.now() / 1000),
+                success: false,
+                message: "Extra parameter passed."
             });
         }
     }

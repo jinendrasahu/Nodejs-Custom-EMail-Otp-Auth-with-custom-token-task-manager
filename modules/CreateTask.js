@@ -8,6 +8,13 @@ module.exports.createTask = async (req, res) => {
             message: "Please enter task."
         });
     }
+    if(Object.keys(req.body).length>1){
+        return res.status(400).json({
+            timestamp: Math.floor(Date.now() / 1000),
+            success: false,
+            message: "Extra parameter passed."
+        });
+    }
 
     let data = {
         user: req.user._id,

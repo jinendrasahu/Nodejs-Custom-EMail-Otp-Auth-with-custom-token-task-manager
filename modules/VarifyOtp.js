@@ -16,6 +16,13 @@ module.exports.varifyOtp = async (req, res) => {
             message: "OTP is required."
         });
     }
+    if(Object.keys(req.body).length!==2){
+        return res.status(400).json({
+            timestamp: Math.floor(Date.now() / 1000),
+            success: false,
+            message: "Extra parameter passed."
+        });
+    }
     let condition = {
         email: req.body.email.toString().trim()
     }

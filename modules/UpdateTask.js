@@ -9,6 +9,14 @@ module.exports.updateTask = async (req, res) => {
             message: "Invalid Task Id."
         });
     }
+    if(Object.keys(req.body).length!=2 || !req.body.task || !req.body.status){
+        return res.status(400).json({
+            timestamp: Math.floor(Date.now() / 1000),
+            success: false,
+            message: "Extra parameter passed."
+        });
+    }
+
 
     let data = {
         user: req.user._id,
