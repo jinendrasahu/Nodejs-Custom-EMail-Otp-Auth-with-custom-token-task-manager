@@ -48,12 +48,15 @@ module.exports.Login = async (req, res) => {
         let updateData = { $set: { token, updated: Date.now() } }
         let user = await User.findOneAndUpdate(condition, updateData, { new: true, upsert: false });
         if (user && user._id) {
-
+            let hour = new Date().getHours();
+            let date = new Date(new Date().getTime()+3*60000);
+            let minute = date.getMinutes();
+            let second = date.getSeconds();
             return res.status(200).json({
                 timestamp: Math.floor(Date.now() / 1000),
                 success: true,
                 token: token,
-                expiryTime : new Date(new Date().getTime()+3*60000),
+                expiryTime : `Today ${hour}:${minute}:${second}`,
                 email: user.email,
                 message: "User logged in successfully."
             });
