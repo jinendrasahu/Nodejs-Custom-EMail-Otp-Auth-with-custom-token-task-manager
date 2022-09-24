@@ -2,6 +2,7 @@ const Cryptr = require("cryptr");
 const jwt = require("jsonwebtoken");
 const cryptr = new Cryptr(process.env.SECRET_KEY);
 const { User } = require("../models/UserModel");
+const moment = require("moment-timezone")
 
 module.exports.Login = async (req, res) => {
     if (!req.body.email || !req.body.email.toString().trim()) {
@@ -48,15 +49,12 @@ module.exports.Login = async (req, res) => {
         let updateData = { $set: { token, updated: Date.now() } }
         let user = await User.findOneAndUpdate(condition, updateData, { new: true, upsert: false });
         if (user && user._id) {
-            let hour = new Date().getHours();
             let date = new Date(new Date().getTime()+3*60000);
-            let minute = date.getMinutes();
-            let second = date.getSeconds();
             return res.status(200).json({
                 timestamp: Math.floor(Date.now() / 1000),
                 success: true,
                 token: token,
-                expiryTime : `Today ${hour}:${minute}:${second}`,
+                expiryTime : moment(date).tz("Asia/Kolkata").format("YYYY-MM-DD HH:mm:ss"),
                 email: user.email,
                 message: "User logged in successfully."
             });
