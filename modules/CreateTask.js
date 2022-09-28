@@ -15,7 +15,7 @@ module.exports.createTask = async (req, res) => {
             message: "Please enter Status."
         });
     }
-    if (req.body.status.trim()!=="Completed" || req.body.status.trim()!=="Incompleted") {
+    if (req.body.status.trim()!=="Completed" && req.body.status.trim()!=="Incompleted") {
         return res.status(400).json({
             timestamp: Math.floor(Date.now() / 1000),
             success: false,
@@ -29,7 +29,7 @@ module.exports.createTask = async (req, res) => {
             message: "Please enter Date."
         });
     }
-    if (mon(req.body.date.toString().trim(),"DD-MM-YYYY",true).isValid()) {
+    if (!mon(req.body.date.toString().trim(),"DD-MM-YYYY",true).isValid()) {
         return res.status(400).json({
             timestamp: Math.floor(Date.now() / 1000),
             success: false,
