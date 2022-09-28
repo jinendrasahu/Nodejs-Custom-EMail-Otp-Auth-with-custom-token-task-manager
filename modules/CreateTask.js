@@ -1,4 +1,5 @@
 const { Task } = require("../models/TaskModel");
+const moment = require("moment-timezone");
 
 module.exports.createTask = async (req, res) => {
     if (!req.body.task || !req.body.task.toString().trim()) {
@@ -29,7 +30,7 @@ module.exports.createTask = async (req, res) => {
             message: "Please enter Date."
         });
     }
-    if (!mon(req.body.date.toString().trim(),"DD-MM-YYYY",true).isValid()) {
+    if (!moment(req.body.date.toString().trim(),"DD-MM-YYYY",true).isValid()) {
         return res.status(400).json({
             timestamp: Math.floor(Date.now() / 1000),
             success: false,
