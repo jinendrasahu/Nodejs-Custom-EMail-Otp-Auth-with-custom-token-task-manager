@@ -40,7 +40,7 @@ module.exports.register = async (req, res, next) => {
             });
         }
     } else {
-        if (Object.keys(req.body).length !== 1) {
+        if (Object.keys(req.body).length !== 2) {
             return res.status(400).json({
                 timestamp: Math.floor(Date.now() / 1000),
                 success: false,
